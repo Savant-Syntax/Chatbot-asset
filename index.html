@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive Chatbot</title>
+    <style>
+      @font-face {
+        font-family: nb;
+        src: url(./asset/NBInternationalProBoo.ttf);
+      }
+      @font-face {
+        font-family: rejoy;
+        src: url(./asset/Rejouice-Headline.ttf);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'nb';
+      }
+
+      html,
+      body {
+        height: 100%;
+        width: 100%;
+      }
+
+      .chat-container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .setup-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .input-group {
+        margin-bottom: 10px;
+        background-color: #fadcd9;
+        border-radius: 8px;
+        padding: 4px 8px;
+      }
+
+      .input-field {
+        padding: 8px;
+        width: 200px;
+        margin-bottom: 10px;
+        border: 1px solid #f9f1f0;
+        border-radius: 4px;
+      }
+
+      .save-button {
+        padding: 10px 20px;
+        border: none;
+        background-color: #f79489;
+        color: #f9f1f0;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .chat-section {
+        width: 100%;
+        height: 100%;
+        max-width: 600px;
+        padding: 20px;
+        background-color: #f9f1f0;
+        border-radius: 10px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .chat-header {
+        font-size: 24px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .chat-header .bot-profile-small {
+        width: 80px; /* Smaller profile image */
+        height: 80px;
+        border-radius: 50%;
+        border: 2px solid #3498db;
+        margin-bottom: 10px;
+        object-fit: cover;
+      }
+
+      .chat-body {
+        height: 300px;
+        overflow-y: auto;
+        margin-bottom: 20px;
+        padding-right: 10px;
+      }
+
+      .input-area {
+        display: flex;
+        align-items: center;
+      }
+
+      .input-textarea {
+        width: 80%;
+        height: 50px;
+        padding: 10px;
+        border-radius: 4px;
+        border: 1px solid #f9f1f0;
+        margin-right: 10px;
+        font-size: 16px;
+      }
+
+      .input-group label {
+        color: #d45e51;
+      }
+
+      .send-button {
+        padding: 10px 20px;
+        border: none;
+        background-color: #d45e51;
+        color: #f9f1f0;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .section-title {
+        margin: 4px;
+        color: #d45e51;
+      }
+      #botNameText {
+        color: #ec9187;
+      }
+
+      /* Profile Image - Fixed Size */
+      .profile-image {
+        width: 50px; /* Set the size of the profile image */
+        height: 50px; /* Set the size of the profile image */
+        border-radius: 50%;
+        border: 2px solid #f8afa6; /* Border around the profile image */
+        object-fit: cover;
+      }
+
+      /* Chat message image - Custom Image inside the message bubble */
+      .message-image {
+        width: 150px; /* Set the width of images inside the message */
+        height: 150px; /* Set the height of images inside the message */
+        object-fit: cover;
+        border-radius: 8px;
+        margin-top: 10px;
+      }
+
+      .chat-message {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 15px;
+      }
+
+      .chat-message .message-bubble {
+        background-color: #f8afa6;
+        border-radius: 10px;
+        padding: 10px;
+        max-width: 80%;
+        word-wrap: break-word;
+      }
+
+      .chat-message.user .message-bubble {
+        background-color: #f8afa6;
+        color: #f9f1f0;
+        margin-left: 50px;
+      }
+
+      .chat-message.bot .message-bubble {
+        background-color: #f8afa6;
+        color: #f9f1f0;
+        margin-right: 50px;
+      }
+
+      .chat-message.user img,
+      .chat-message.bot img {
+        margin-right: 10px;
+      }
+
+      /* Align profile images for bot and user */
+      .chat-message.bot {
+        justify-content: flex-start; /* Align bot's image to the left */
+      }
+
+      .chat-message.bot img {
+        order: -1; /* Move bot's image to the left side */
+      }
+
+      .chat-message.user {
+        justify-content: flex-end; /* Align user’s image to the right */
+      }
+
+      .chat-message.user img {
+        order: 1; /* Move user’s image to the right side */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="chat-container">
+      <!-- Profile Setup -->
+      <div id="setup-section" class="setup-section">
+        <h2 class="section-title">Set Up Profiles</h2>
+        <div class="input-group">
+          <label>Your Name</label>
+          <input
+            id="userNameInput"
+            type="text"
+            placeholder="Enter your name"
+            class="input-field"
+          />
+          <label>Your Photo</label>
+          <input
+            id="userProfileInput"
+            type="file"
+            accept="image/*"
+            class="input-field"
+          />
+        </div>
+        <div class="input-group">
+          <label>Bot Name</label>
+          <input
+            id="botNameInput"
+            type="text"
+            placeholder="Enter bot name"
+            class="input-field"
+          />
+          <label>Bot Photo</label>
+          <input
+            id="botProfileInput"
+            type="file"
+            accept="image/*"
+            class="input-field"
+          />
+        </div>
+        <button onclick="saveProfiles()" class="save-button">
+          Save Profiles
+        </button>
+      </div>
+
+      <!-- Chatbot Section -->
+      <div id="chat-section" class="chat-section hidden">
+        <div id="chat-header" class="chat-header">
+          <!-- Small bot profile image above the bot's name -->
+          <img
+            id="botProfileImageSmall"
+            class="bot-profile-small"
+            src=""
+            alt="Bot Profile"
+          />
+          <div id="botNameText"></div>
+          <!-- Display bot name here -->
+        </div>
+        <div id="chat-body" class="chat-body">
+          <!-- Chat messages will appear here -->
+        </div>
+        <div class="input-area">
+          <textarea
+            id="userInput"
+            placeholder="Type your message..."
+            class="input-textarea"
+            onkeydown="handleKey(event)"
+          ></textarea>
+          <button onclick="sendMessage()" class="send-button">Send</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const chatBody = document.getElementById('chat-body');
+      const userInput = document.getElementById('userInput');
+      const chatSection = document.getElementById('chat-section');
+      const chatHeader = document.getElementById('chat-header');
+      const botProfileImageSmall = document.getElementById(
+        'botProfileImageSmall'
+      );
+      const botNameText = document.getElementById('botNameText');
+
+      let userName = 'You';
+      let botName = 'Bot';
+      let userProfileImageURL = null;
+      let botProfileImageURL = null;
+
+      const responses = {
+        hello: 'Hi there! How can I assist you today?',
+        'how are you?': "I'm just a bot, but I'm here to help!",
+        'what is a chatbot?':
+          'A chatbot is an artificial intelligence (AI) program that simulates human-like conversations with users, often through messaging apps, websites, or mobile apps.',
+        'what is tailwind css?':
+          'Tailwind CSS is a utility-first CSS framework that provides pre-defined classes to design web applications quickly without writing custom CSS.',
+        'explain recursion':
+          'Recursion is a programming technique where a function calls itself to solve a problem. It typically includes a base case to terminate the recursion and a recursive step that divides the problem into smaller instances.',
+        bye: 'Goodbye! Have a great day!',
+        // Custom questions with images
+        'your message1':
+          '<strong>Bot reply1:</strong><br><img src="" class="message-image" alt="uniqueName1">',
+        'your message2': 'Bot reply', //img tag is not alway necessary
+        'your message3':
+          '<strong>Bot reply3:</strong><br><img src="" class="message-image" alt="uniqueName3">',
+      };
+
+      function getBotResponse(message) {
+        const normalizedMessage = message.toLowerCase();
+        return responses[normalizedMessage] || responses['default'];
+      }
+
+      function saveProfiles() {
+        userName =
+          document.getElementById('userNameInput').value.trim() || 'You';
+        const userFile = document.getElementById('userProfileInput').files[0];
+        if (userFile) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            userProfileImageURL = e.target.result;
+          };
+          reader.readAsDataURL(userFile);
+        }
+
+        botName = document.getElementById('botNameInput').value.trim() || 'Bot';
+        const botFile = document.getElementById('botProfileInput').files[0];
+        if (botFile) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            botProfileImageURL = e.target.result;
+            botProfileImageSmall.src = botProfileImageURL; // Update small profile image
+            chatHeader.querySelector('div').innerText = botName; // Update bot name text
+          };
+          reader.readAsDataURL(botFile);
+        } else {
+          botProfileImageSmall.src = ''; // Default empty image
+          chatHeader.querySelector('div').innerText = botName; // Default bot name
+        }
+
+        document.getElementById('setup-section').classList.add('hidden');
+        chatSection.classList.remove('hidden');
+      }
+
+      function sendMessage() {
+        const userMessage = userInput.value.trim();
+        if (!userMessage) return;
+
+        appendMessage(userName, userMessage, 'user', userProfileImageURL);
+
+        const botResponse = getBotResponse(userMessage);
+        appendMessage(botName, botResponse, 'bot', botProfileImageURL);
+
+        userInput.value = '';
+      }
+
+      function appendMessage(sender, message, style, imageURL) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `chat-message ${style}`;
+        messageDiv.innerHTML = `
+        ${
+          style === 'bot' && imageURL
+            ? `<img src="${imageURL}" alt="${sender}" class="profile-image">`
+            : ''
+        }
+        <div class="message-bubble">
+            <strong>${sender}:</strong> ${message}
+        </div>
+      `;
+        chatBody.appendChild(messageDiv);
+        chatBody.scrollTop = chatBody.scrollHeight;
+      }
+
+      function handleKey(event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+          event.preventDefault();
+          sendMessage();
+        }
+      }
+    </script>
+  </body>
+</html>
